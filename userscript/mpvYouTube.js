@@ -1,0 +1,77 @@
+// ==UserScript==
+// @name         YouTube MPV Player
+// @version      0.2
+// @description  This little script opens any YouTube video in MPV with a simple button click
+// @author       TibixDev
+// @match        https://www.youtube.com/*
+// @icon         https://i.imgur.com/o2042cG.png
+// @grant        GM_addStyle
+// ==/UserScript==
+
+(async function () {
+    'use strict';
+    console.log("[YTMPV] YouTube MPV player script loaded");
+
+    function setButtonInterval() {
+        return setInterval(() => {
+            if (document.querySelector("#actions>#actions-inner>#menu>ytd-menu-renderer>#top-level-buttons-computed>yt-button-view-model")) {
+                console.log("[YTMPV] Menu container found, executing...");
+                addMpvButton()
+            }
+        }, 2000);
+    }
+
+    // let waitForButtons = setButtonInterval();
+    let waitForButtons = null;
+
+    let location = window.location.href;;
+    if (location.match(/^https:\/\/www\.youtube\.com\/watch\?v=([^&]*)/)) {
+        waitForButtons = setButtonInterval();
+      console.log("[YTMPV] Video link correct: " + location);
+    }
+
+    let waitForUrlChange = setInterval(() => {
+        if (location !== window.location.href && window.location.href.includes("watch?v=") && !waitForButtons) {
+            console.log("[YTMPV] Video URL detected, toggling waitForButtons...");
+            waitForButtons = setButtonInterval();
+            location = window.location.href;
+        }
+    }, 2000);
+
+    function addMpvButton() {
+        clearInterval(waitForButtons);
+        waitForButtons = null;
+        const ytButtons = document.querySelector("#actions>#actions-inner>#menu>ytd-menu-renderer>#top-level-buttons-computed");
+        const ytButton = document.createElement("button");
+        ytButton.id = "mpv-button";
+        ytButton.classList.add("ytSpecButtonViewModelHost", "style-scope", "ytd-menu-renderer", "yt-spec-button-shape-next", "yt-spec-button-shape-next--tonal", "yt-spec-button-shape-next--mono", "yt-spec-button-shape-next--size-m", "yt-spec-button-shape-next--icon-leading", "yt-spec-button-shape-next--enable-backdrop-filter-experiment");
+        const mpvBtnStyle = `
+        #mpv-button {
+            margin-left: 10px;
+        }`
+
+        const styleElem = document.createElement("style");
+        if (styleElem.styleSheet) {
+            styleElem.styleSheet.cssText = mpvBtnStyle;
+        } else {
+            styleElem.appendChild(document.createTextNode(mpvBtnStyle));
+        }
+        document.getElementsByTagName('head')[0].appendChild(styleElem);
+        //ytButton.style.cssText = "margin-left: 10px;";
+        ytButton.textContent = "▶ MPV";
+        ytButton.addEventListener("click", () => {
+            document.querySelector("video").pause();
+            document.location = "mpv://" + document.location.href;
+            ytButton.textContent = "⌛ Opening...";
+            ytButton.style.cssText = "background-color: #0a6dab;";
+            setTimeout(() => {
+                ytButton.textContent = "▶ MPV";
+                ytButton.style.cssText = "";
+            }, 3000);
+        });
+
+        ytButtons.appendChild(ytButton);
+        console.log("[YTMPV] MPV button added");
+        console.log(ytButton, ytButtons);
+    }
+})();

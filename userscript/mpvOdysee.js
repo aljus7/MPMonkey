@@ -1,69 +1,56 @@
 // ==UserScript==
-// @name         YouTube MPV Player
+// @name         Odysee MPV Player
 // @version      0.2
-// @description  This little script opens any YouTube video in MPV with a simple button click
+// @description  This little script opens any Odysee video in MPV with a simple button click
 // @author       TibixDev
-// @match        https://www.youtube.com/*
-// @icon         https://i.imgur.com/o2042cG.png
+// @match        https://odysee.com/*
+// @icon         https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Odysee_Logo.svg/1200px-Odysee_Logo.svg.png
 // @grant        GM_addStyle
 // ==/UserScript==
 
 (async function () {
     'use strict';
-    console.log("[YTMPV] YouTube MPV player script loaded");
-
+    console.log("[YTMPV] Odysee MPV player script loaded");
+	let urlRegex = /^https:\/\/(www\.)?odysee\.com\/@[^:]+:[^\/]+\/[^:]+:[^\/]*$/
+  
     function setButtonInterval() {
         return setInterval(() => {
-            if (document.querySelector("#info>#menu-container>#menu>ytd-menu-renderer>#top-level-buttons-computed>ytd-toggle-button-renderer")) {
+            if (document.querySelector(".card__body>.media__subtitle--between>.media__actions")) {
                 console.log("[YTMPV] Menu container found, executing...");
                 addMpvButton()
             }
-        }, 1000);
+        }, 2000);
     }
 
     // let waitForButtons = setButtonInterval();
     let waitForButtons = null;
 
     let location = window.location.href;;
-    if (location.match(/^https:\/\/www\.youtube\.com\/watch\?v=([^&]*)/)) {
+    if (location.match(urlRegex)) {
         waitForButtons = setButtonInterval();
+      console.log("[YTMPV] Starting video link correct: " + location);
     }
 
     let waitForUrlChange = setInterval(() => {
-        if (location !== window.location.href && window.location.href.includes("watch?v=") && !waitForButtons) {
+        if (location !== window.location.href && window.location.href.match(urlRegex) && !waitForButtons) {
             console.log("[YTMPV] Video URL detected, toggling waitForButtons...");
             waitForButtons = setButtonInterval();
             location = window.location.href;
         }
-    }, 1000);
+    }, 2000);
 
     function addMpvButton() {
         clearInterval(waitForButtons);
         waitForButtons = null;
-        const ytButtons = document.querySelector("#info>#menu-container>#menu>ytd-menu-renderer>#top-level-buttons-computed");
+        const ytButtons = document.querySelector(".card__body>.media__subtitle--between>.media__actions");
         const ytButton = document.createElement("button");
         ytButton.id = "mpv-button";
+        ytButton.classList.add("button", "button--no-style", "button--file-action");
         const mpvBtnStyle = `
         #mpv-button {
-            color: white;
-            cursor: pointer;
-            background-color: #043565;
-            border-radius: 10px;
-            margin-left: 10px;
             margin-right: 10px;
-            padding-left: 10px;
-            padding-right: 10px;
-            font-size: var(--ytd-tab-system-font-size);
-            font-weight: var(--ytd-tab-system-font-weight);
-            font-family: Roboto, Arial, sans-serif;
-            border: 0;
-            transition: all 0.2s ease-in-out;
-        }
-    
-        #mpv-button:hover {
-            background-color: #0a6dab;
         }`
-    
+
         const styleElem = document.createElement("style");
         if (styleElem.styleSheet) {
             styleElem.styleSheet.cssText = mpvBtnStyle;
@@ -71,7 +58,7 @@
             styleElem.appendChild(document.createTextNode(mpvBtnStyle));
         }
         document.getElementsByTagName('head')[0].appendChild(styleElem);
-        // ytButton.style.cssText = mpvBtnStyle;
+        //ytButton.style.cssText = "margin-right: 10px;";
         ytButton.textContent = "▶ MPV";
         ytButton.addEventListener("click", () => {
             document.querySelector("video").pause();
@@ -83,7 +70,7 @@
                 ytButton.style.cssText = "";
             }, 3000);
         });
-    
+
         ytButtons.appendChild(ytButton);
         console.log("[YTMPV] MPV button added");
         console.log(ytButton, ytButtons);
