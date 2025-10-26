@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Video Downloader
+Exec=bash -c 'arg=$0; arg=${arg/"https//"/"https://"}; clean_url=${arg:19}; echo "Download URL: $clean_url"; yt-dlp -f "best[height<=1080]/best" --output "$HOME/Downloads/%(title)s.%(ext)s" "$clean_url" || (echo "ERROR: Download failed for URL: $clean_url" && echo "Raw arg: $arg"; echo "Raw link:" $0 && sleep 5)' "%u"
+StartupNotify=true
+MimeType=x-scheme-handler/ytdlp-downloader
+Terminal=true  # Change to false after testing for background runs
+Hidden=false
+Icon=download
