@@ -21,22 +21,29 @@
         }, 2000);
     }
 
-    // let waitForButtons = setButtonInterval();
     let waitForButtons = null;
 
-    let location = window.location.href;;
+    let location = window.location.href;
     if (location.match(/^https:\/\/www\.youtube\.com\/watch\?v=([^&]*)/)) {
         waitForButtons = setButtonInterval();
       console.log("[YTMPV] Video link correct: " + location);
     }
 
-    let waitForUrlChange = setInterval(() => {
-        if (location !== window.location.href && window.location.href.includes("watch?v=") && !waitForButtons) {
+    function handleVideoUrlChange(newUrl) {
+        if (location !== newUrl && newUrl.includes("watch?v=") && !waitForButtons) {
             console.log("[YTMPV] Video URL detected, toggling waitForButtons...");
             waitForButtons = setButtonInterval();
-            location = window.location.href;
+            location = newUrl;
         }
-    }, 2000);
+    }
+
+    // Listen for YouTube's navigation finish event
+    window.addEventListener('yt-navigate-finish', () => {
+        // Small delay to ensure URL and content are settled
+        setTimeout(() => {
+            handleVideoUrlChange(window.location.href);
+        }, 100);
+    });
 
     function addMpvButton() {
         clearInterval(waitForButtons);

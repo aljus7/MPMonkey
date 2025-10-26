@@ -12,7 +12,7 @@
     'use strict';
     console.log("[YTMPV] Odysee MPV player script loaded");
 	let urlRegex = /^https:\/\/(www\.)?odysee\.com\/@[^:]+:[^\/]+\/[^:]+:[^\/]*$/
-  
+
     function setButtonInterval() {
         return setInterval(() => {
             if (document.querySelector(".card__body>.media__subtitle--between>.media__actions")) {
@@ -22,7 +22,6 @@
         }, 2000);
     }
 
-    // let waitForButtons = setButtonInterval();
     let waitForButtons = null;
 
     let location = window.location.href;;
@@ -31,13 +30,6 @@
       console.log("[YTMPV] Starting video link correct: " + location);
     }
 
-    let waitForUrlChange = setInterval(() => {
-        if (location !== window.location.href && window.location.href.match(urlRegex) && !waitForButtons) {
-            console.log("[YTMPV] Video URL detected, toggling waitForButtons...");
-            waitForButtons = setButtonInterval();
-            location = window.location.href;
-        }
-    }, 2000);
 
     function addMpvButton() {
         clearInterval(waitForButtons);
