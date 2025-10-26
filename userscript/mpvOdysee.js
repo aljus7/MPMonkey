@@ -15,6 +15,7 @@
 
     function setButtonInterval() {
         return setInterval(() => {
+            //console.log("pooling menu container");
             if (document.querySelector(".card__body>.media__subtitle--between>.media__actions")) {
                 console.log("[YTMPV] Menu container found, executing...");
                 addMpvButton()
@@ -30,6 +31,25 @@
       console.log("[YTMPV] Starting video link correct: " + location);
     }
 
+    function handleVideoUrlChange(newUrl) {
+        if (location !== newUrl && window.location.href.match(urlRegex) && !waitForButtons) {
+            console.log("[YTMPV] Video URL detected, toggling waitForButtons...");
+            waitForButtons = setButtonInterval();
+            location = newUrl;
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        //console.log("click");
+        // Optional: Skip if clicking your button or specific elements
+
+        if (e.target.id === "mpv-button") {
+            return; // Don't refresh on MPV button clicks
+        }
+        setTimeout(() => {
+            handleVideoUrlChange(window.location.href);
+        }, 100);
+    }, true);
 
     function addMpvButton() {
         clearInterval(waitForButtons);
